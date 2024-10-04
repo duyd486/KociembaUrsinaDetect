@@ -1,13 +1,14 @@
 from ursina import *
 import random
 
-app = Ursina()
+app = Ursina(title='DUY DEP TRAI',icon='textures/my_dog_icon.ico')
 class RubikCube(Entity):
     def __init__(self, **kwargs):
         super().__init__()
         plane = Entity(model='quad', scale=60, texture='white_cube', texture_scale=(60, 60), rotation_x=90, y=-5,
                color=color.light_gray)
         sky = Entity(model='sphere', scale=150, texture='textures/test', double_sided=True)  # sky
+        window.borderless = False
         EditorCamera()
         camera.world_position = (0, 0, -15)
         self.load_game()
