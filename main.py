@@ -1,3 +1,4 @@
+from kociemba import solve
 from ursina import *
 from solve_2d_cube import *
 import cv2
@@ -8,25 +9,27 @@ app = Ursina(title='DUY DEP TRAI',icon='textures/my_dog_icon.ico')
 class RubikCube(Entity):
     def __init__(self, **kwargs):
         super().__init__()
-        plane = Entity(model='quad', scale=60, texture='textures/grass.jpg', texture_scale=(60, 60), rotation_x=90, y=-5)
-        sky = Entity(model='sphere', scale=150, texture='textures/test', double_sided=True)  # sky
+        plane = Entity(model='quad', scale=40, texture='textures/grass.jpg', texture_scale=(60, 60), rotation_x=90, y=-5)
+        sky = Entity(model='cube', scale=150, texture='textures/test', double_sided=True)  # sky
         window.borderless = False
         EditorCamera()
-        camera.world_position = (0, 0, -15)
+        camera.world_position = (0, 0, -20)
 
         # self.text = TextField(scale = 0.1, line_height= 1.1, character_limit=None)
         # self.text.text = dedent("Hello")
         # self.text.render()
 
+        self.message = Text(origin=(0,18))
+        self.message.text = dedent("Use FRLUDB to move the cube, press O to open camera, I to solve by step").strip()
 
         #cv2 code
-        self.solution = []
+        self.solution = ""
         self.speed_up_move = 0
         self.normal_move = 0.5
         self.delay_move = 0.08
         self.step = 0
         self.firstCall = True
-        self.values = ""
+        self.myvalues = ""
         self.re_conv = {
             # "F" : "F'",
             # "F'" : "F",
@@ -67,11 +70,11 @@ class RubikCube(Entity):
         }
         self.state = {
             'up': ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', ],
-            'right': ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', ],
-            'front': ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', ],
-            'down': ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', ],
-            'left': ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', ],
-            'back': ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', ]
+            'right': ['red', 'red', 'red', 'red', 'red', 'red', 'red', 'red', 'red', ],
+            'front': ['green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', ],
+            'down': ['yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', ],
+            'left': ['orange', 'orange', 'orange', 'orange', 'orange', 'orange', 'orange', 'orange', 'orange', ],
+            'back': ['blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', ]
         }
         self.stickers = {
             'main': [
@@ -234,6 +237,7 @@ class RubikCube(Entity):
                         values.reverse()
                         print(values)
                         self.delay_move = 0
+                        self.speed_up_move = 0
                         for value in values:
                             value = self.re_conv[value]
                             lis_value = list(value)
@@ -260,6 +264,49 @@ class RubikCube(Entity):
             cv2.imshow('preview',preview)
             cv2.imshow('frame',img[0:500,0:500])
         cv2.destroyAllWindows()
+
+    def step_solve(self):
+        if self.solution == "":
+            print("solution is emty!")
+        else:
+            if self.firstCall:
+                print("solution is: " + self.solution)
+                self.myvalues = self.solution
+                self.myvalues = list(self.myvalues.split(" "))
+                self.step = 0
+                self.firstCall = False
+            self.speed_up_move = self.normal_move + 0.5
+            self.delay_move = 0
+            # lis_value = list(self.myvalues[self.step])
+            # if lis_value[-1] == '2':
+            #     lis_value.pop(-1)
+            #     self.myvalues[self.step] = ''.join(lis_value)
+            #     self.move(self.myvalues[self.step].lower())
+            #     self.move(self.myvalues[self.step].lower())
+            #     print('moving ' + self.myvalues[self.step])
+            # else:
+            self.move(self.myvalues[self.step].lower())
+            print('moving ' + self.myvalues[self.step])
+            self.step += 1
+
+            if self.step == len(self.myvalues):
+                self.step = 0
+                self.firstCall = True
+                self.delay_move = 0.08
+                self.solution = ""
+
+
+        # for value in values:
+        #     lis_value = list(value)
+        #     if lis_value[-1] == '2':
+        #         lis_value.pop(-1)
+        #         value = ''.join(lis_value)
+        #         self.move(value)
+        #         self.move(value)
+        #         print('moving ' + value)
+        #     else:
+        #         self.move(value)
+        #         print('moving ' + value)
 
 
     def move(self, value):
@@ -301,11 +348,34 @@ class RubikCube(Entity):
             self.animation_time = self.speed_up_move
             self.rotate_side('UP',-90)
 
+        if value == 'l2' :
+            self.animation_time = self.speed_up_move
+            self.rotate_side('LEFT',-180)
+        if value == 'd2':
+            self.animation_time = self.speed_up_move
+            self.rotate_side('DOWN',-180)
+        if value == 'r2':
+            self.animation_time = self.speed_up_move
+            self.rotate_side('RIGHT',180)
+        if value == 'f2':
+            self.animation_time = self.speed_up_move
+            self.rotate_side('FRONT',180)
+        if value == 'b2':
+            self.animation_time = self.speed_up_move
+            self.rotate_side('BACK',-180)
+        if value == 'u2':
+            self.animation_time = self.speed_up_move
+            self.rotate_side('UP',180)
+
+
     def input(self, key):
         if key == 'o':
             self.rubik_detect()
         if key == 's':
             print(self.solution)
+        if key == 'i':
+            self.animation_time = self.normal_move
+            self.step_solve()
         if key == 'l' and self.action_trigger:
             self.animation_time = self.normal_move
             self.rotate_side('LEFT',-90)
