@@ -59,7 +59,7 @@ def color_detect(h, s, v):
     elif s <= 40:
         return 'white'
 
-    return 'black'
+    return 'red'
 
 
 def draw_stickers(frame, stickers, name):

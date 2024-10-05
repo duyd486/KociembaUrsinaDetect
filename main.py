@@ -1,8 +1,7 @@
-
+from PIL.ImageOps import scale
 from ursina import *
 from solve_2d_cube import *
 import cv2
-from ursina.color import text_color
 import random
 
 app = Ursina(title='DUY DEP TRAI',icon='textures/my_dog_icon.ico')
@@ -18,13 +17,14 @@ class RubikCube(Entity):
         # self.text = TextField(scale = 0.1, line_height= 1.1, character_limit=None)
         # self.text.text = dedent("Hello")
         # self.text.render()
-
-        self.message = Text(origin=(0,18))
+        self.message = Text(origin=(0,17))
         self.message.text = dedent("Sử dụng URLFDB để di chuyển khối rubik, ấn O để mở camera, I để giải từng bước, S để xáo, E để quay trở lại khối rubik hoàn chỉnh").strip()
 
         self.my_step = Text(origin=(0,-14), scale_override = 3)
         #self.my_step.size = 0.5
         self.my_step.text = dedent("Hi!")
+
+        self.my_solution = Text(origin=(0,12), scale_override = 2)
 
         #cv2 code
         self.solution = ""
@@ -133,20 +133,182 @@ class RubikCube(Entity):
         self.load_game()
 
     def load_game(self):
+
         self.create_cube_positions()
         self.CUBES = [Entity(model='models/custom_cube', texture= 'textures/my_rubik_texture', position=pos) for pos in self.SIDE_POSITIONS]
         self.PARENT = Entity(model = 'models/custom_cube', texture = 'textures/dirt', position = (0,0,0))
         self.rotation_axes = {'LEFT': 'x', 'RIGHT': 'x', 'UP': 'y', 'DOWN': 'y', 'FRONT': 'z', 'BACK': 'z'}
         self.cubes_side_positons = {'LEFT': self.LEFT, 'DOWN': self.DOWN, 'RIGHT': self.RIGHT, 'FRONT': self.FRONT,
                                     'BACK': self.BACK, 'UP': self.UP}
+        #self.test_cube = Entity(model = 'cube', position = (-.5,0,0), color = rgb(1,0.5,0), scale = (.1,.95,.95), parent = self.CUBES[0])
+        # self.test_cube.parent = self.CUBES[0]
         self.animation_time = 0.2
         self.action_trigger = True
-        print("load")
+        self.set_color_cube()
+        #self.test_cube = Entity(model = 'cube', position = (2,0,0), color = rgb(0,0,0), collider = 'box')
+
+
+
+    def set_color_cube(self):
+        for cube in self.CUBES:
+            Entity(model='cube', position=(-.5, 0, 0), color=rgb(1, 0.5, 0), scale=(.05, .9, .9),
+                                    parent=cube, collider = 'box')
+            Entity(model='cube', position=(.5, 0, 0), color=rgb(1, 0, 0), scale=(.05, .9, .9),
+                                    parent=cube, collider = 'box')
+            Entity(model='cube', position=(0, 0, -0.5), color=rgb(0, 1, 0), scale=(.9, .9, .05),
+                                    parent=cube, collider = 'box')
+            Entity(model='cube', position=(0, 0, 0.5), color=rgb(0, 0, 1), scale=(.9, .9, .05),
+                                    parent=cube, collider = 'box')
+            Entity(model='cube', position=(0, 0.5, 0), color=rgb(1, 1, 1), scale=(.9, .05, .9),
+                                    parent=cube, collider = 'box')
+            Entity(model='cube', position=(0, -0.5, 0), color=rgb(1, 1, 0), scale=(.9, .05, .9),
+                                    parent=cube, collider = 'box')
+
+    def read_cube_up(self):
+        z=1
+        st = 0
+        while z >= -1:
+            for x in range(-1,2):
+                hit = raycast(origin=(x,3,z), direction=(0,-1,0), distance=3, debug=False)
+                if(hit.entity.color == rgb(1,0,0)):
+                    self.state['up'][st] = 'red'
+                if (hit.entity.color == rgb(1, 1, 1)):
+                    self.state['up'][st] = 'white'
+                if(hit.entity.color == rgb(0,0,1)):
+                    self.state['up'][st] = 'blue'
+                if(hit.entity.color == rgb(0,1,0)):
+                    self.state['up'][st] = 'green'
+                if(hit.entity.color == rgb(1,1,0)):
+                    self.state['up'][st] = 'yellow'
+                if(hit.entity.color == rgb(1,0.5,0)):
+                    self.state['up'][st] = 'orange'
+                st += 1
+            z -= 1
+    def read_cube_down(self):
+        z=-1
+        st = 0
+        while z <= 1:
+            for x in range(-1,2):
+                hit = raycast(origin=(x,-3,z), direction=(0,1,0), distance=3, debug=False)
+                if(hit.entity.color == rgb(1,0,0)):
+                    self.state['down'][st] = 'red'
+                if (hit.entity.color == rgb(1, 1, 1)):
+                    self.state['down'][st] = 'white'
+                if(hit.entity.color == rgb(0,0,1)):
+                    self.state['down'][st] = 'blue'
+                if(hit.entity.color == rgb(0,1,0)):
+                    self.state['down'][st] = 'green'
+                if(hit.entity.color == rgb(1,1,0)):
+                    self.state['down'][st] = 'yellow'
+                if(hit.entity.color == rgb(1,0.5,0)):
+                    self.state['down'][st] = 'orange'
+                st += 1
+            z += 1
+    def read_cube_front(self):
+        y=1
+        st = 0
+        while y >= -1:
+            for x in range(-1,2):
+                hit = raycast(origin=(x,y,-3), direction=(0,0,1), distance=3, debug=False)
+                if(hit.entity.color == rgb(1,0,0)):
+                    self.state['front'][st] = 'red'
+                if (hit.entity.color == rgb(1, 1, 1)):
+                    self.state['front'][st] = 'white'
+                if(hit.entity.color == rgb(0,0,1)):
+                    self.state['front'][st] = 'blue'
+                if(hit.entity.color == rgb(0,1,0)):
+                    self.state['front'][st] = 'green'
+                if(hit.entity.color == rgb(1,1,0)):
+                    self.state['front'][st] = 'yellow'
+                if(hit.entity.color == rgb(1,0.5,0)):
+                    self.state['front'][st] = 'orange'
+                st += 1
+            y -= 1
+    def read_cube_back(self):
+        y=1
+        st = 0
+        while y >= -1:
+            x = 1
+            while x >= -1:
+                hit = raycast(origin=(x,y,3), direction=(0,0,-1), distance=3, debug=False)
+                if(hit.entity.color == rgb(1,0,0)):
+                    self.state['back'][st] = 'red'
+                if (hit.entity.color == rgb(1, 1, 1)):
+                    self.state['back'][st] = 'white'
+                if(hit.entity.color == rgb(0,0,1)):
+                    self.state['back'][st] = 'blue'
+                if(hit.entity.color == rgb(0,1,0)):
+                    self.state['back'][st] = 'green'
+                if(hit.entity.color == rgb(1,1,0)):
+                    self.state['back'][st] = 'yellow'
+                if(hit.entity.color == rgb(1,0.5,0)):
+                    self.state['back'][st] = 'orange'
+                x -= 1
+                st += 1
+            y -= 1
+    def read_cube_left(self):
+        y=1
+        st = 0
+        while y >= -1:
+            z = 1
+            while z >= -1:
+                hit = raycast(origin=(-3,y,z), direction=(1,0,0), distance=3, debug=False)
+                if(hit.entity.color == rgb(1,0,0)):
+                    self.state['left'][st] = 'red'
+                if (hit.entity.color == rgb(1, 1, 1)):
+                    self.state['left'][st] = 'white'
+                if(hit.entity.color == rgb(0,0,1)):
+                    self.state['left'][st] = 'blue'
+                if(hit.entity.color == rgb(0,1,0)):
+                    self.state['left'][st] = 'green'
+                if(hit.entity.color == rgb(1,1,0)):
+                    self.state['left'][st] = 'yellow'
+                if(hit.entity.color == rgb(1,0.5,0)):
+                    self.state['left'][st] = 'orange'
+                z -= 1
+                st += 1
+            y -= 1
+    def read_cube_right(self):
+        y=1
+        st = 0
+        while y >= -1:
+            for z in range(-1,2):
+                hit = raycast(origin=(3,y,z), direction=(-1,0,0), distance=3, debug=False)
+                if(hit.entity.color == rgb(1,0,0)):
+                    self.state['right'][st] = 'red'
+                if (hit.entity.color == rgb(1, 1, 1)):
+                    self.state['right'][st] = 'white'
+                if(hit.entity.color == rgb(0,0,1)):
+                    self.state['right'][st] = 'blue'
+                if(hit.entity.color == rgb(0,1,0)):
+                    self.state['right'][st] = 'green'
+                if(hit.entity.color == rgb(1,1,0)):
+                    self.state['right'][st] = 'yellow'
+                if(hit.entity.color == rgb(1,0.5,0)):
+                    self.state['right'][st] = 'orange'
+                st += 1
+            y -= 1
+
+
+    def auto_solve(self):
+        self.read_cube_up()
+        self.read_cube_down()
+        self.read_cube_front()
+        self.read_cube_back()
+        self.read_cube_left()
+        self.read_cube_right()
+
+        self.solution = detect_solve(self.state)
+        print(self.solution)
+        self.my_solution.text = dedent("Solution is: " + self.solution)
+
+
 
     def reset_cube(self):
         for cube in self.CUBES:
             destroy(cube)
         self.CUBES = [Entity(model='models/custom_cube', texture= 'textures/my_rubik_texture', position=pos) for pos in self.SIDE_POSITIONS]
+        self.set_color_cube()
         print("Cube reset!")
 
     def toggle_animation_trigger(self):
@@ -267,7 +429,7 @@ class RubikCube(Entity):
                                 self.move(value)
                                 print('moving ' + value)
                         self.delay_move = 0.08
-                        self.my_step.text = dedent("Quét thành công, ấn I để bắn đầu giải")
+                        self.my_step.text = dedent("Quét thành công, ấn I để bắt đầu giải")
                         break
 
                     except:
@@ -284,17 +446,20 @@ class RubikCube(Entity):
         cv2.destroyAllWindows()
 
     def step_solve(self):
-        if self.solution == "":
-            print("solution is emty! Try scan your cube again")
-        else:
-            if self.firstCall:
-                print("solution is: " + self.solution)
-                self.myvalues = self.solution
-                self.myvalues = list(self.myvalues.split(" "))
-                self.step = 0
-                self.firstCall = False
-            self.speed_up_move = self.normal_move + 0.5
-            self.delay_move = 0
+        # if self.solution == "":
+        #     print("solution is emty! Try scan your cube again")
+        #     self.my_step.text = dedent("Khối rubik đã được giải!")
+        #
+        # else:
+        if self.firstCall:
+            print("solution is: " + self.solution)
+            self.auto_solve()
+            self.myvalues = self.solution
+            self.myvalues = list(self.myvalues.split(" "))
+            self.step = 0
+            self.firstCall = False
+        self.speed_up_move = self.normal_move + 0.5
+        self.delay_move = 0
             # lis_value = list(self.myvalues[self.step])
             # if lis_value[-1] == '2':
             #     lis_value.pop(-1)
@@ -303,15 +468,15 @@ class RubikCube(Entity):
             #     self.move(self.myvalues[self.step].lower())
             #     print('moving ' + self.myvalues[self.step])
             # else:
-            self.move(self.myvalues[self.step].lower())
-            print('moving ' + self.myvalues[self.step])
-            self.step += 1
+        self.move(self.myvalues[self.step].lower())
+        print('moving ' + self.myvalues[self.step])
+        self.step += 1
 
-            if self.step == len(self.myvalues):
-                self.step = 0
-                self.firstCall = True
-                self.delay_move = 0.08
-                self.solution = ""
+        if self.step == len(self.myvalues):
+            self.step = 0
+            self.firstCall = True
+            self.delay_move = 0.08
+            self.solution = ""
 
 
         # for value in values:
@@ -393,6 +558,11 @@ class RubikCube(Entity):
 
 
     def input(self, key):
+
+        if key == 't':
+            self.auto_solve()
+
+
         if key == 'e':
             self.reset_cube()
             self.my_step.text = dedent("Đã giải!")
@@ -422,6 +592,8 @@ class RubikCube(Entity):
             self.animation_time = self.normal_move
             self.rotate_side('RIGHT',90)
             self.my_step.text = dedent("R")
+
+
         if key == 'f' and self.action_trigger:
             self.animation_time = self.normal_move
             self.rotate_side('FRONT',90)
