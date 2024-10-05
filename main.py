@@ -70,11 +70,11 @@ class RubikCube(Entity):
         }
         self.state = {
             'up': ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', ],
-            'right': ['red', 'red', 'red', 'red', 'red', 'red', 'red', 'red', 'red', ],
-            'front': ['green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', ],
-            'down': ['yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', ],
-            'left': ['orange', 'orange', 'orange', 'orange', 'orange', 'orange', 'orange', 'orange', 'orange', ],
-            'back': ['blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', ]
+            'right': ['white', 'white', 'white', 'white', 'red', 'white', 'white', 'white', 'white', ],
+            'front': ['white', 'white', 'white', 'white', 'green', 'white', 'white', 'white', 'white', ],
+            'down': ['white', 'white', 'white', 'white', 'yellow', 'white', 'white', 'white', 'white', ],
+            'left': ['white', 'white', 'white', 'white', 'orange', 'white', 'white', 'white', 'white', ],
+            'back': ['white', 'white', 'white', 'white', 'blue', 'white', 'white', 'white', 'white', ]
         }
         self.stickers = {
             'main': [
@@ -267,7 +267,7 @@ class RubikCube(Entity):
 
     def step_solve(self):
         if self.solution == "":
-            print("solution is emty!")
+            print("solution is emty! Try scan your cube again")
         else:
             if self.firstCall:
                 print("solution is: " + self.solution)
