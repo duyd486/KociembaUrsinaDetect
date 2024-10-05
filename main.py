@@ -10,7 +10,7 @@ class RubikCube(Entity):
     def __init__(self, **kwargs):
         super().__init__()
         plane = Entity(model='quad', scale=40, texture='textures/grass.jpg', texture_scale=(60, 60), rotation_x=90, y=-5)
-        sky = Entity(model='cube', scale=150, texture='textures/test', double_sided=True)  # sky
+        sky = Entity(model='sphere', scale=150, texture='textures/sky2.jpg', double_sided=True)  # sky
         window.borderless = False
         EditorCamera()
         camera.world_position = (0, 0, -20)
@@ -20,7 +20,7 @@ class RubikCube(Entity):
         # self.text.render()
 
         self.message = Text(origin=(0,18))
-        self.message.text = dedent("Sử dụng URLFDB để di chuyển khối rubik, ấn O để mở camera, I để giải từng bước, S để xáo").strip()
+        self.message.text = dedent("Sử dụng URLFDB để di chuyển khối rubik, ấn O để mở camera, I để giải từng bước, S để xáo, E để quay trở lại khối rubik hoàn chỉnh").strip()
 
         self.my_step = Text(origin=(0,-14), scale_override = 3)
         #self.my_step.size = 0.5
@@ -143,6 +143,11 @@ class RubikCube(Entity):
         self.action_trigger = True
         print("load")
 
+    def reset_cube(self):
+        for cube in self.CUBES:
+            destroy(cube)
+        self.CUBES = [Entity(model='models/custom_cube', texture= 'textures/my_rubik_texture', position=pos) for pos in self.SIDE_POSITIONS]
+        print("Cube reset!")
 
     def toggle_animation_trigger(self):
         self.action_trigger = not self.action_trigger
@@ -183,7 +188,6 @@ class RubikCube(Entity):
         for i in range(25):
             self.move(random.choice(possible_move))
         self.speed_up_move = self.normal_move
-        self.my_step.text = dedent("Scamble done!")
 
     def rubik_detect(self):
         print("Hi im rubik detect")
@@ -389,6 +393,10 @@ class RubikCube(Entity):
 
 
     def input(self, key):
+        if key == 'e':
+            self.reset_cube()
+            self.my_step.text = dedent("Đã giải!")
+
         if key == 'o':
             self.my_step.text = dedent("Đang mở camera,...")
             print("opening camera...")
@@ -396,6 +404,8 @@ class RubikCube(Entity):
 
         if key == 's':
             self.scramble()
+            self.my_step.text = dedent("Đã xáo!")
+
 
         if key == 'i':
             self.animation_time = self.normal_move
@@ -403,21 +413,29 @@ class RubikCube(Entity):
         if key == 'l' and self.action_trigger:
             self.animation_time = self.normal_move
             self.rotate_side('LEFT',-90)
+            self.my_step.text = dedent("L")
         if key == 'd' and self.action_trigger:
             self.animation_time = self.normal_move
             self.rotate_side('DOWN',-90)
+            self.my_step.text = dedent("D")
         if key == 'r' and self.action_trigger:
             self.animation_time = self.normal_move
             self.rotate_side('RIGHT',90)
+            self.my_step.text = dedent("R")
         if key == 'f' and self.action_trigger:
             self.animation_time = self.normal_move
             self.rotate_side('FRONT',90)
+            self.my_step.text = dedent("F")
         if key == 'b' and self.action_trigger:
             self.animation_time = self.normal_move
             self.rotate_side('BACK',-90)
+            self.my_step.text = dedent("B")
+
         if key == 'u' and self.action_trigger:
             self.animation_time = self.normal_move
             self.rotate_side('UP',90)
+            self.my_step.text = dedent("U")
+
 
 
 
