@@ -1,4 +1,4 @@
-from kociemba import solve
+
 from ursina import *
 from solve_2d_cube import *
 import cv2
@@ -20,7 +20,11 @@ class RubikCube(Entity):
         # self.text.render()
 
         self.message = Text(origin=(0,18))
-        self.message.text = dedent("Use FRLUDB to move the cube, press O to open camera, I to solve by step").strip()
+        self.message.text = dedent("Sử dụng URLFDB để di chuyển khối rubik, ấn O để mở camera, I để giải từng bước, S để xáo").strip()
+
+        self.my_step = Text(origin=(0,-14), scale_override = 3)
+        #self.my_step.size = 0.5
+        self.my_step.text = dedent("Hi!")
 
         #cv2 code
         self.solution = ""
@@ -128,7 +132,6 @@ class RubikCube(Entity):
 
         self.load_game()
 
-
     def load_game(self):
         self.create_cube_positions()
         self.CUBES = [Entity(model='models/custom_cube', texture= 'textures/my_rubik_texture', position=pos) for pos in self.SIDE_POSITIONS]
@@ -155,7 +158,6 @@ class RubikCube(Entity):
                 eval(f'self.PARENT.animate_rotation_{rotation_axis}(degree, duration=self.animation_time)')
         invoke(self.toggle_animation_trigger, delay=self.animation_time + self.delay_move)
 
-
     def reparent_to_scene(self):
         for cube in self.CUBES:
             if cube.parent == self.PARENT:
@@ -163,7 +165,6 @@ class RubikCube(Entity):
                 cube.parent = scene
                 cube.position, cube.rotation = world_pos, world_rot
         self.PARENT.rotation = 0
-
 
     def create_cube_positions(self):
         self.LEFT = {Vec3(-1, y, z) for y in range(-1, 2) for z in range(-1, 2)}
@@ -174,9 +175,20 @@ class RubikCube(Entity):
         self.UP = {Vec3(x, 1, z) for x in range(-1, 2) for z in range(-1, 2)}
         self.SIDE_POSITIONS = self.LEFT | self.DOWN | self.FRONT | self.BACK | self.RIGHT | self.UP
 
+
+    def scramble(self):
+        print("scram")
+        possible_move = ['l','r','u','d','b','f']
+        self.speed_up_move = 0
+        for i in range(25):
+            self.move(random.choice(possible_move))
+        self.speed_up_move = self.normal_move
+        self.my_step.text = dedent("Scamble done!")
+
     def rubik_detect(self):
         print("Hi im rubik detect")
         print("Wait a second")
+
         cap = cv2.VideoCapture(0)
         cap.set(cv2.CAP_PROP_BUFFERSIZE, 3)
         while True:
@@ -251,6 +263,7 @@ class RubikCube(Entity):
                                 self.move(value)
                                 print('moving ' + value)
                         self.delay_move = 0.08
+                        self.my_step.text = dedent("Quét thành công, ấn I để bắn đầu giải")
                         break
 
                     except:
@@ -261,6 +274,7 @@ class RubikCube(Entity):
                     #Chưa scan xong, thiếu mặt cần scan
                     print("")
                     print("left to scan:",6-len(set(self.check_state)))
+
             cv2.imshow('preview',preview)
             cv2.imshow('frame',img[0:500,0:500])
         cv2.destroyAllWindows()
@@ -307,7 +321,6 @@ class RubikCube(Entity):
         #     else:
         #         self.move(value)
         #         print('moving ' + value)
-
 
     def move(self, value):
         if value == 'l' :
@@ -367,12 +380,23 @@ class RubikCube(Entity):
             self.animation_time = self.speed_up_move
             self.rotate_side('UP',180)
 
+        self.my_step.text = dedent(value.upper())
+
+        # self.my_step.text = dedent(value.upper()).strip()
+
+
+
+
 
     def input(self, key):
         if key == 'o':
+            self.my_step.text = dedent("Đang mở camera,...")
+            print("opening camera...")
             self.rubik_detect()
+
         if key == 's':
-            print(self.solution)
+            self.scramble()
+
         if key == 'i':
             self.animation_time = self.normal_move
             self.step_solve()
@@ -394,6 +418,9 @@ class RubikCube(Entity):
         if key == 'u' and self.action_trigger:
             self.animation_time = self.normal_move
             self.rotate_side('UP',90)
+
+
+
 
 
 
