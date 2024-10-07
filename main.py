@@ -76,6 +76,14 @@ class RubikCube(Entity):
             'left': ['white', 'white', 'white', 'white', 'orange', 'white', 'white', 'white', 'white', ],
             'back': ['white', 'white', 'white', 'white', 'blue', 'white', 'white', 'white', 'white', ]
         }
+        self.origin_state = {
+            'up': ['white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', 'white', ],
+            'right': ['red', 'red', 'red', 'red', 'red', 'red', 'red', 'red', 'red', ],
+            'front': ['green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', 'green', ],
+            'down': ['yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', 'yellow', ],
+            'left': ['orange', 'orange', 'orange', 'orange', 'orange', 'orange', 'orange', 'orange', 'orange', ],
+            'back': ['blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', 'blue', ]
+        }
         self.stickers = {
             'main': [
                 [200, 120], [300, 120], [400, 120],
@@ -452,7 +460,14 @@ class RubikCube(Entity):
 
     # solve by step
     def step_solve(self):
-        if self.firstCall:
+        # Check if the cube already solved
+        self.take_state()
+        if self.state == self.origin_state:
+            self.my_solution.text = dedent("The cube is solved")
+            print("This cube is solved")
+            return
+        # if not, start the solve loop
+        if self.firstCall and self.action_trigger:
             self.take_state()
             self.myvalues = detect_solve(self.state)
             self.my_solution.text = dedent("Solution is: " + self.myvalues)
@@ -460,10 +475,9 @@ class RubikCube(Entity):
             self.myvalues = list(self.myvalues.split(" "))
             self.step = 0
             self.firstCall = False
-
-        self.speed_up_move = self.normal_move + 0.5
-        self.delay_move = 0.05
         if self.action_trigger:
+            self.speed_up_move = self.normal_move + 0.5
+            self.delay_move = 0.05
             self.move(self.myvalues[self.step].lower())
             print('moving ' + self.myvalues[self.step])
             self.step += 1
