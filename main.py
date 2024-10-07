@@ -467,7 +467,7 @@ class RubikCube(Entity):
             print("This cube is solved")
             return
         # if not, start the solve loop
-        if self.firstCall and self.action_trigger:
+        if self.firstCall:
             self.take_state()
             self.myvalues = detect_solve(self.state)
             self.my_solution.text = dedent("Solution is: " + self.myvalues)
@@ -585,7 +585,7 @@ class RubikCube(Entity):
             self.scramble()
             self.my_step.text = dedent("Đã xáo!")
             self.solution = ""
-        if key == 'i':
+        if key == 'i' and self.action_trigger:
             self.animation_time = self.normal_move
             self.step_solve()
 
