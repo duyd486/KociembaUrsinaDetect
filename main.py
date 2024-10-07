@@ -18,11 +18,8 @@ class RubikCube(Entity):
         # self.text.text = dedent("Hello")
         # self.text.render()
 
-        self.my_step = Text(origin=(0,-15), scale_override = 3)
         #self.my_step.size = 0.5
-        self.my_step.text = dedent("Hi!")
 
-        self.my_solution = Text(origin=(0,-13), scale_override = 2)
 
         #cv2 code
         self.solution = ""
@@ -143,19 +140,22 @@ class RubikCube(Entity):
         self.animation_time = 0.2
         self.action_trigger = True
         self.set_color_cube()
-        self.my_tuto()
+        self.my_ui()
         #self.test_cube = Entity(model = 'cube', position = (2,0,0), color = rgb(0,0,0), collider = 'box')
 
 
 
 #UI
-    def my_tuto(self):
+    def my_ui(self):
+        self.my_step = Text(origin=(0,-15), scale_override = 3)
+        self.my_step.text = dedent("Hi!")
+        self.my_solution = Text(origin=(0,-13), scale_override = 2)
+
+
         message = Text(origin=(0,13))
         message.text = dedent("I để giải từng bước, S để xáo, E để quay trở lại khối rubik hoàn chỉnh").strip()
-        camera = Text(origin = (3,-5), color = rgb(0,0,0))
-        camera.text = dedent("Ấn O để mở camera").strip()
-        #move = Text(origin = (1,0), color = rgb(0,0,0))
-        #move.text = dedent("Ấn URLFDB để di chuyển khối rubik").strip()
+        camera = Text(origin = (-0.5,0.5), color = rgb(0,0,0), position = (-0.8,0.2))
+        camera.text = dedent("Ấn O để mở camera \n \nẤn URFLDB để di chuyển khối rubik").strip()
     def set_color_cube(self):
         for cube in self.CUBES:
             Entity(model='cube', position=(-.5, 0, 0), color=rgb(1, 0.5, 0), scale=(.05, .9, .9),
@@ -299,7 +299,7 @@ class RubikCube(Entity):
             y -= 1
 
 
-    def auto_solve(self):
+    def take_state(self):
         self.read_cube_up()
         self.read_cube_down()
         self.read_cube_front()
@@ -307,9 +307,8 @@ class RubikCube(Entity):
         self.read_cube_left()
         self.read_cube_right()
 
-        self.solution = detect_solve(self.state)
-        print(self.solution)
-        self.my_solution.text = dedent("Solution is: " + self.solution)
+        #self.solution = detect_solve(self.state)
+        #print(self.solution)
 
 
 
@@ -418,7 +417,7 @@ class RubikCube(Entity):
                     #lay cong thuc giai, dao nguoc va cho khoi rubik chay
                     try:
                         values = detect_solve(self.state)
-                        self.solution = values
+                        #self.solution = values
                         #self.solution = list(values.split(" "))
                         values = list(values.split(" "))
                         values.reverse()
@@ -455,37 +454,27 @@ class RubikCube(Entity):
         cv2.destroyAllWindows()
 
     def step_solve(self):
-        # if self.solution == "":
-        #     print("solution is emty! Try scan your cube again")
-        #     self.my_step.text = dedent("Khối rubik đã được giải!")
-        #
-        # else:
         if self.firstCall:
-            print("solution is: " + self.solution)
-            #self.auto_solve()
-            self.myvalues = self.solution
+            self.take_state()
+            self.myvalues = detect_solve(self.state)
+            self.my_solution.text = dedent("Solution is: " + self.myvalues)
+            print("solution is: " + self.myvalues)
             self.myvalues = list(self.myvalues.split(" "))
             self.step = 0
             self.firstCall = False
+
         self.speed_up_move = self.normal_move + 0.5
-        self.delay_move = 0
-            # lis_value = list(self.myvalues[self.step])
-            # if lis_value[-1] == '2':
-            #     lis_value.pop(-1)
-            #     self.myvalues[self.step] = ''.join(lis_value)
-            #     self.move(self.myvalues[self.step].lower())
-            #     self.move(self.myvalues[self.step].lower())
-            #     print('moving ' + self.myvalues[self.step])
-            # else:
-        self.move(self.myvalues[self.step].lower())
-        print('moving ' + self.myvalues[self.step])
-        self.step += 1
+        self.delay_move = 0.05
+        if self.action_trigger:
+            self.move(self.myvalues[self.step].lower())
+            print('moving ' + self.myvalues[self.step])
+            self.step += 1
 
         if self.step == len(self.myvalues):
             self.step = 0
             self.firstCall = True
             self.delay_move = 0.08
-            self.solution = ""
+            self.myvalues = ""
 
 
         # for value in values:
@@ -569,60 +558,65 @@ class RubikCube(Entity):
     def input(self, key):
 
         if key == 't':
-            self.auto_solve()
+            self.take_state()
 
 
         if key == 'e':
             self.reset_cube()
             self.my_step.text = dedent("Đã giải!")
+            self.firstCall = True
 
         if key == 'o':
             self.my_step.text = dedent("Đang mở camera,...")
             print("opening camera...")
             self.rubik_detect()
+            self.firstCall = True
 
         if key == 's':
             self.scramble()
             self.my_step.text = dedent("Đã xáo!")
-
+            self.solution = ""
 
         if key == 'i':
             self.animation_time = self.normal_move
             self.step_solve()
+
+
         if key == 'l' and self.action_trigger:
             self.animation_time = self.normal_move
             self.rotate_side('LEFT',-90)
             self.my_step.text = dedent("L")
+            self.firstCall = True
+
         if key == 'd' and self.action_trigger:
             self.animation_time = self.normal_move
             self.rotate_side('DOWN',-90)
             self.my_step.text = dedent("D")
+            self.firstCall = True
+
         if key == 'r' and self.action_trigger:
             self.animation_time = self.normal_move
             self.rotate_side('RIGHT',90)
             self.my_step.text = dedent("R")
-
+            self.firstCall = True
 
         if key == 'f' and self.action_trigger:
             self.animation_time = self.normal_move
             self.rotate_side('FRONT',90)
             self.my_step.text = dedent("F")
+            self.firstCall = True
+
         if key == 'b' and self.action_trigger:
             self.animation_time = self.normal_move
             self.rotate_side('BACK',-90)
             self.my_step.text = dedent("B")
+            self.firstCall = True
 
         if key == 'u' and self.action_trigger:
             self.animation_time = self.normal_move
             self.rotate_side('UP',90)
             self.my_step.text = dedent("U")
-
-
-
-
-
-
-
+            self.firstCall = True
 
 
 rubik = RubikCube()
