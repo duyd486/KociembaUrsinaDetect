@@ -6,6 +6,7 @@ import random
 
 app = Ursina(title='DUY DEP TRAI',icon='textures/my_dog_icon.ico')
 class RubikCube(Entity):
+    # game attribute
     def __init__(self, **kwargs):
         super().__init__()
         plane = Entity(model='quad', scale=40, texture='textures/grass.jpg', texture_scale=(60, 60), rotation_x=90, y=-5)
@@ -127,6 +128,7 @@ class RubikCube(Entity):
 
         self.load_game()
 
+    # game setup
     def load_game(self):
 
         self.create_cube_positions()
@@ -143,9 +145,7 @@ class RubikCube(Entity):
         self.my_ui()
         #self.test_cube = Entity(model = 'cube', position = (2,0,0), color = rgb(0,0,0), collider = 'box')
 
-
-
-#UI
+    # UI
     def my_ui(self):
         self.my_step = Text(origin=(0,-15), scale_override = 3)
         self.my_step.text = dedent("Hi!")
@@ -156,6 +156,8 @@ class RubikCube(Entity):
         message.text = dedent("I để giải từng bước, S để xáo, E để quay trở lại khối rubik hoàn chỉnh").strip()
         camera = Text(origin = (-0.5,0.5), color = rgb(0,0,0), position = (-0.8,0.2))
         camera.text = dedent("Ấn O để mở camera \n \nẤn URFLDB để di chuyển khối rubik").strip()
+
+    # for read cube
     def set_color_cube(self):
         for cube in self.CUBES:
             Entity(model='cube', position=(-.5, 0, 0), color=rgb(1, 0.5, 0), scale=(.05, .9, .9),
@@ -170,9 +172,6 @@ class RubikCube(Entity):
                                     parent=cube, collider = 'box')
             Entity(model='cube', position=(0, -0.5, 0), color=rgb(1, 1, 0), scale=(.9, .05, .9),
                                     parent=cube, collider = 'box')
-
-
-#read cube
     def read_cube_up(self):
         z=1
         st = 0
@@ -298,7 +297,7 @@ class RubikCube(Entity):
                 st += 1
             y -= 1
 
-
+    # read the cube
     def take_state(self):
         self.read_cube_up()
         self.read_cube_down()
@@ -310,8 +309,7 @@ class RubikCube(Entity):
         #self.solution = detect_solve(self.state)
         #print(self.solution)
 
-
-
+    # destroy and rebuild cube
     def reset_cube(self):
         for cube in self.CUBES:
             destroy(cube)
@@ -319,9 +317,9 @@ class RubikCube(Entity):
         self.set_color_cube()
         print("Cube reset!")
 
+    # creat and rotate func
     def toggle_animation_trigger(self):
         self.action_trigger = not self.action_trigger
-
     def rotate_side(self, side_name, degree):
         self.action_trigger = False
         cube_positions = self.cubes_side_positons[side_name]
@@ -332,7 +330,6 @@ class RubikCube(Entity):
                 cube.parent = self.PARENT
                 eval(f'self.PARENT.animate_rotation_{rotation_axis}(degree, duration=self.animation_time)')
         invoke(self.toggle_animation_trigger, delay=self.animation_time + self.delay_move)
-
     def reparent_to_scene(self):
         for cube in self.CUBES:
             if cube.parent == self.PARENT:
@@ -340,7 +337,6 @@ class RubikCube(Entity):
                 cube.parent = scene
                 cube.position, cube.rotation = world_pos, world_rot
         self.PARENT.rotation = 0
-
     def create_cube_positions(self):
         self.LEFT = {Vec3(-1, y, z) for y in range(-1, 2) for z in range(-1, 2)}
         self.DOWN = {Vec3(x, -1, z) for x in range(-1, 2) for z in range(-1, 2)}
@@ -350,7 +346,7 @@ class RubikCube(Entity):
         self.UP = {Vec3(x, 1, z) for x in range(-1, 2) for z in range(-1, 2)}
         self.SIDE_POSITIONS = self.LEFT | self.DOWN | self.FRONT | self.BACK | self.RIGHT | self.UP
 
-
+    # random 25 move
     def scramble(self):
         print("scram")
         possible_move = ['l','r','u','d','b','f']
@@ -359,6 +355,7 @@ class RubikCube(Entity):
             self.move(random.choice(possible_move))
         self.speed_up_move = self.normal_move
 
+    # cv2
     def rubik_detect(self):
         print("Hi im rubik detect")
         print("Wait a second")
@@ -453,6 +450,7 @@ class RubikCube(Entity):
             cv2.imshow('frame',img[0:500,0:500])
         cv2.destroyAllWindows()
 
+    # solve by step
     def step_solve(self):
         if self.firstCall:
             self.take_state()
@@ -489,6 +487,8 @@ class RubikCube(Entity):
         #         self.move(value)
         #         print('moving ' + value)
 
+
+    # move func
     def move(self, value):
         if value == 'l' :
             self.animation_time = self.speed_up_move
@@ -554,29 +554,23 @@ class RubikCube(Entity):
 
 
 
-
+    # key input from user
     def input(self, key):
-
         if key == 't':
             self.take_state()
-
-
         if key == 'e':
             self.reset_cube()
             self.my_step.text = dedent("Đã giải!")
             self.firstCall = True
-
         if key == 'o':
             self.my_step.text = dedent("Đang mở camera,...")
             print("opening camera...")
             self.rubik_detect()
             self.firstCall = True
-
         if key == 's':
             self.scramble()
             self.my_step.text = dedent("Đã xáo!")
             self.solution = ""
-
         if key == 'i':
             self.animation_time = self.normal_move
             self.step_solve()
@@ -620,12 +614,4 @@ class RubikCube(Entity):
 
 
 rubik = RubikCube()
-
-
-
-
-
-
-
-
 app.run()
