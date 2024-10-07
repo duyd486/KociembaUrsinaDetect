@@ -17,14 +17,12 @@ class RubikCube(Entity):
         # self.text = TextField(scale = 0.1, line_height= 1.1, character_limit=None)
         # self.text.text = dedent("Hello")
         # self.text.render()
-        self.message = Text(origin=(0,17))
-        self.message.text = dedent("Sử dụng URLFDB để di chuyển khối rubik, ấn O để mở camera, I để giải từng bước, S để xáo, E để quay trở lại khối rubik hoàn chỉnh").strip()
 
-        self.my_step = Text(origin=(0,-14), scale_override = 3)
+        self.my_step = Text(origin=(0,-15), scale_override = 3)
         #self.my_step.size = 0.5
         self.my_step.text = dedent("Hi!")
 
-        self.my_solution = Text(origin=(0,12), scale_override = 2)
+        self.my_solution = Text(origin=(0,-13), scale_override = 2)
 
         #cv2 code
         self.solution = ""
@@ -145,10 +143,19 @@ class RubikCube(Entity):
         self.animation_time = 0.2
         self.action_trigger = True
         self.set_color_cube()
+        self.my_tuto()
         #self.test_cube = Entity(model = 'cube', position = (2,0,0), color = rgb(0,0,0), collider = 'box')
 
 
 
+#UI
+    def my_tuto(self):
+        message = Text(origin=(0,13))
+        message.text = dedent("I để giải từng bước, S để xáo, E để quay trở lại khối rubik hoàn chỉnh").strip()
+        camera = Text(origin = (3,-5), color = rgb(0,0,0))
+        camera.text = dedent("Ấn O để mở camera").strip()
+        #move = Text(origin = (1,0), color = rgb(0,0,0))
+        #move.text = dedent("Ấn URLFDB để di chuyển khối rubik").strip()
     def set_color_cube(self):
         for cube in self.CUBES:
             Entity(model='cube', position=(-.5, 0, 0), color=rgb(1, 0.5, 0), scale=(.05, .9, .9),
@@ -164,6 +171,8 @@ class RubikCube(Entity):
             Entity(model='cube', position=(0, -0.5, 0), color=rgb(1, 1, 0), scale=(.9, .05, .9),
                                     parent=cube, collider = 'box')
 
+
+#read cube
     def read_cube_up(self):
         z=1
         st = 0
@@ -453,7 +462,7 @@ class RubikCube(Entity):
         # else:
         if self.firstCall:
             print("solution is: " + self.solution)
-            self.auto_solve()
+            #self.auto_solve()
             self.myvalues = self.solution
             self.myvalues = list(self.myvalues.split(" "))
             self.step = 0

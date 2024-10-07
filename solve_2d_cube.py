@@ -46,17 +46,17 @@ def detect_solve(state):
 
 def color_detect(h, s, v):
     # print(h,s,v)
-    if (h > 140 and h <= 180 and s > 40) or (h > 0 and h < 5 and s > 40):
+    if (h > 140 and h <= 180 and s > 45) or (h > 0 and h < 5 and s > 45):
         return 'red'
-    elif h >= 5 and h < 21 and s > 40:
+    elif h >= 5 and h < 21 and s > 45:
         return 'orange'
-    elif h > 20 and h < 40 and s > 40:
+    elif h > 20 and h < 40 and s > 45:
         return 'yellow'
-    elif h > 40 and h < 90 and s > 40:
+    elif h > 40 and h < 90 and s > 45:
         return 'green'
-    elif h > 90 and h < 140 and s > 40:
+    elif h > 90 and h < 140 and s > 45:
         return 'blue'
-    elif s <= 40:
+    elif s <= 50:
         return 'white'
 
     return 'red'
