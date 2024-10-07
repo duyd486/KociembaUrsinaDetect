@@ -570,8 +570,6 @@ class RubikCube(Entity):
 
     # key input from user
     def input(self, key):
-        if key == 't':
-            self.take_state()
         if key == 'e':
             self.reset_cube()
             self.my_step.text = dedent("Đã giải!")
@@ -584,7 +582,7 @@ class RubikCube(Entity):
         if key == 's':
             self.scramble()
             self.my_step.text = dedent("Đã xáo!")
-            self.solution = ""
+            self.firstCall = True
         if key == 'i' and self.action_trigger:
             self.animation_time = self.normal_move
             self.step_solve()
