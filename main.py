@@ -1,25 +1,18 @@
-from PIL.ImageOps import scale
 from ursina import *
 from solve_2d_cube import *
 import cv2
 import random
 
-app = Ursina(title='DUY DEP TRAI',icon='textures/my_dog_icon.ico')
+
+app = Ursina(title='I LOVE YOU',icon='assets/textures/my_dog_icon.ico')
 class RubikCube(Entity):
     # game attribute
     def __init__(self, **kwargs):
         super().__init__()
-        plane = Entity(model='quad', scale=40, texture='textures/grass.jpg', texture_scale=(60, 60), rotation_x=90, y=-5)
-        sky = Entity(model='sphere', scale=150, texture='textures/sky2.jpg', double_sided=True)  # sky
+        sky = Sky(texture='sky_sunset')
         window.borderless = False
         EditorCamera()
-        camera.world_position = (0, 0, -20)
-
-        # self.text = TextField(scale = 0.1, line_height= 1.1, character_limit=None)
-        # self.text.text = dedent("Hello")
-        # self.text.render()
-
-        #self.my_step.size = 0.5
+        camera.world_position = (0,0,-20)
 
 
         #cv2 code
@@ -155,30 +148,31 @@ class RubikCube(Entity):
 
     # UI
     def my_ui(self):
-        self.my_step = Text(origin=(0,-15), scale_override = 3)
-        self.my_step.text = dedent("Hi!")
-        self.my_solution = Text(origin=(0,-13), scale_override = 2)
+        self.my_step_ui = Text(origin=(0, -15), scale_override = 3)
+        self.my_solution_ui = Text(origin=(0, -13), scale_override = 2)
+        camera_ui = Text(origin = (-0.5,0.5), color = rgb(0,0,0), position = (-0.8,0.2))
+        message_ui = Text(origin=(0,13))
+        step_solve_ui = Text()
 
+        message_ui.text = dedent("Sử dụng URFLDB để di chuyển khối rubik  ").strip()
+        camera_ui.text = dedent("E: quay trở lại khối rubik hoàn chỉnh\n\n\nO: mở camera\n\n\nI: giải từng bước\n\n\nS: xáo").strip()
+        self.my_step_ui.text = dedent("Hi!")
 
-        message = Text(origin=(0,13))
-        message.text = dedent("I để giải từng bước, S để xáo, E để quay trở lại khối rubik hoàn chỉnh").strip()
-        camera = Text(origin = (-0.5,0.5), color = rgb(0,0,0), position = (-0.8,0.2))
-        camera.text = dedent("Ấn O để mở camera \n \nẤn URFLDB để di chuyển khối rubik").strip()
 
     # for read cube
     def set_color_cube(self):
         for cube in self.CUBES:
-            Entity(model='cube', position=(-.5, 0, 0), color=rgb(1, 0.5, 0), scale=(.05, .9, .9),
+            Entity(model='cube', position=(-.5, 0, 0), color=rgb(1, 0.5, 0), scale=(.02, .9, .9),
                                     parent=cube, collider = 'box')
-            Entity(model='cube', position=(.5, 0, 0), color=rgb(1, 0, 0), scale=(.05, .9, .9),
+            Entity(model='cube', position=(.5, 0, 0), color=rgb(1, 0, 0), scale=(.02, .9, .9),
                                     parent=cube, collider = 'box')
-            Entity(model='cube', position=(0, 0, -0.5), color=rgb(0, 1, 0), scale=(.9, .9, .05),
+            Entity(model='cube', position=(0, 0, -0.5), color=rgb(0, 1, 0), scale=(.9, .9, .02),
                                     parent=cube, collider = 'box')
-            Entity(model='cube', position=(0, 0, 0.5), color=rgb(0, 0, 1), scale=(.9, .9, .05),
+            Entity(model='cube', position=(0, 0, 0.5), color=rgb(0, 0, 1), scale=(.9, .9, .02),
                                     parent=cube, collider = 'box')
-            Entity(model='cube', position=(0, 0.5, 0), color=rgb(1, 1, 1), scale=(.9, .05, .9),
+            Entity(model='cube', position=(0, 0.5, 0), color=rgb(1, 1, 1), scale=(.9, .02, .9),
                                     parent=cube, collider = 'box')
-            Entity(model='cube', position=(0, -0.5, 0), color=rgb(1, 1, 0), scale=(.9, .05, .9),
+            Entity(model='cube', position=(0, -0.5, 0), color=rgb(1, 1, 0), scale=(.9, .02, .9),
                                     parent=cube, collider = 'box')
     def read_cube_up(self):
         z=1
@@ -442,7 +436,7 @@ class RubikCube(Entity):
                                 self.move(value)
                                 print('moving ' + value)
                         self.delay_move = 0.08
-                        self.my_step.text = dedent("Quét thành công, ấn I để bắt đầu giải")
+                        self.my_step_ui.text = dedent("Quét thành công, ấn I để bắt đầu giải")
                         break
 
                     except:
@@ -463,14 +457,14 @@ class RubikCube(Entity):
         # Check if the cube already solved
         self.take_state()
         if self.state == self.origin_state:
-            self.my_solution.text = dedent("The cube is solved")
+            self.my_solution_ui.text = dedent("The cube is solved")
             print("This cube is solved")
             return
         # if not, start the solve loop
         if self.firstCall:
             self.take_state()
             self.myvalues = detect_solve(self.state)
-            self.my_solution.text = dedent("Solution is: " + self.myvalues)
+            self.my_solution_ui.text = dedent("Solution is: " + self.myvalues)
             print("solution is: " + self.myvalues)
             self.myvalues = list(self.myvalues.split(" "))
             self.step = 0
@@ -561,7 +555,7 @@ class RubikCube(Entity):
             self.animation_time = self.speed_up_move
             self.rotate_side('UP',180)
 
-        self.my_step.text = dedent(value.upper())
+        self.my_step_ui.text = dedent(value.upper())
 
         # self.my_step.text = dedent(value.upper()).strip()
 
@@ -570,18 +564,22 @@ class RubikCube(Entity):
 
     # key input from user
     def input(self, key):
+        if key == 't':
+            print(camera.world_position)
+            print(camera.world_rotation)
+
         if key == 'e':
             self.reset_cube()
-            self.my_step.text = dedent("Đã giải!")
+            self.my_step_ui.text = dedent("Đã giải!")
             self.firstCall = True
         if key == 'o':
-            self.my_step.text = dedent("Đang mở camera,...")
+            self.my_step_ui.text = dedent("Đang mở camera,...")
             print("opening camera...")
             self.rubik_detect()
             self.firstCall = True
-        if key == 's':
+        if key == 's' and self.action_trigger:
             self.scramble()
-            self.my_step.text = dedent("Đã xáo!")
+            self.my_step_ui.text = dedent("Đã xáo!")
             self.firstCall = True
         if key == 'i' and self.action_trigger:
             self.animation_time = self.normal_move
@@ -591,37 +589,37 @@ class RubikCube(Entity):
         if key == 'l' and self.action_trigger:
             self.animation_time = self.normal_move
             self.rotate_side('LEFT',-90)
-            self.my_step.text = dedent("L")
+            self.my_step_ui.text = dedent("L")
             self.firstCall = True
 
         if key == 'd' and self.action_trigger:
             self.animation_time = self.normal_move
             self.rotate_side('DOWN',-90)
-            self.my_step.text = dedent("D")
+            self.my_step_ui.text = dedent("D")
             self.firstCall = True
 
         if key == 'r' and self.action_trigger:
             self.animation_time = self.normal_move
             self.rotate_side('RIGHT',90)
-            self.my_step.text = dedent("R")
+            self.my_step_ui.text = dedent("R")
             self.firstCall = True
 
         if key == 'f' and self.action_trigger:
             self.animation_time = self.normal_move
             self.rotate_side('FRONT',90)
-            self.my_step.text = dedent("F")
+            self.my_step_ui.text = dedent("F")
             self.firstCall = True
 
         if key == 'b' and self.action_trigger:
             self.animation_time = self.normal_move
             self.rotate_side('BACK',-90)
-            self.my_step.text = dedent("B")
+            self.my_step_ui.text = dedent("B")
             self.firstCall = True
 
         if key == 'u' and self.action_trigger:
             self.animation_time = self.normal_move
             self.rotate_side('UP',90)
-            self.my_step.text = dedent("U")
+            self.my_step_ui.text = dedent("U")
             self.firstCall = True
 
 
