@@ -10,15 +10,15 @@ sys.argv.append("build")
 
 
 setup(
-    name = "MyRubik",
-    version = '0.1',
+    name = "MY RUBIK CUBE",
+    version = '1.0.0',
     description = "This is description",
     options = {"build_exe": {"packages": ['ursina']}},
     executables = [
         Executable(
-            target_name= "My Rubik Cube",
+            target_name= "MY RUBIK CUBE",
             script="main.py",
-            icon="assets/textures/my_dog_icon.ico",
+            icon="assets/textures/favicon.ico",
             base = "Win32GUI"
         )
     ]

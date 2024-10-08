@@ -50,11 +50,11 @@ def color_detect(h, s, v):
         return 'red'
     elif h >= 5 and h < 21 and s > 45:
         return 'orange'
-    elif h > 20 and h < 40 and s > 45:
+    elif h > 20 and h <= 40 and s > 45:
         return 'yellow'
     elif h > 40 and h < 90 and s > 45:
         return 'green'
-    elif h > 90 and h < 140 and s > 45:
+    elif h >= 90 and h < 140 and s > 45:
         return 'blue'
     elif s <= 50:
         return 'white'

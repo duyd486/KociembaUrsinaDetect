@@ -4,7 +4,7 @@ import cv2
 import random
 
 
-app = Ursina(title='I LOVE YOU',icon='assets/textures/my_dog_icon.ico')
+app = Ursina(title='MY RUBIK CUBE',icon='assets/textures/favicon.ico')
 class RubikCube(Entity):
     # game attribute
     def __init__(self, **kwargs):
@@ -127,6 +127,8 @@ class RubikCube(Entity):
         self.check_state = []
         self.solved = False
 
+
+
         self.load_game()
 
     # game setup
@@ -144,19 +146,23 @@ class RubikCube(Entity):
         self.action_trigger = True
         self.set_color_cube()
         self.my_ui()
+
+
         #self.test_cube = Entity(model = 'cube', position = (2,0,0), color = rgb(0,0,0), collider = 'box')
 
     # UI
     def my_ui(self):
         self.my_step_ui = Text(origin=(0, -15), scale_override = 3)
         self.my_solution_ui = Text(origin=(0, -13), scale_override = 2)
-        camera_ui = Text(origin = (-0.5,0.5), color = rgb(0,0,0), position = (-0.8,0.2))
+        camera_ui = Text(origin = (-0.5,0.5), color = rgb(0,0,0), position = (-0.83,0.15))
         message_ui = Text(origin=(0,13))
         step_solve_ui = Text()
 
         message_ui.text = dedent("Sử dụng URFLDB để di chuyển khối rubik  ").strip()
-        camera_ui.text = dedent("E: quay trở lại khối rubik hoàn chỉnh\n\n\nO: mở camera\n\n\nI: giải từng bước\n\n\nS: xáo").strip()
+        camera_ui.text = dedent("E: trở lại khối rubik hoàn chỉnh\n\n\nO: mở camera\n\n\nI: giải từng bước\n\n\nS: xáo").strip()
         self.my_step_ui.text = dedent("Hi!")
+        camera_ui.create_background(color= rgb(1,1,1))
+        camera_ui.align()
 
 
     # for read cube
@@ -457,7 +463,7 @@ class RubikCube(Entity):
         # Check if the cube already solved
         self.take_state()
         if self.state == self.origin_state:
-            self.my_solution_ui.text = dedent("The cube is solved")
+            self.my_solution_ui.text = dedent("Khối Rubik đã được giải")
             print("This cube is solved")
             return
         # if not, start the solve loop
@@ -565,14 +571,15 @@ class RubikCube(Entity):
     # key input from user
     def input(self, key):
         if key == 't':
-            print(camera.world_position)
-            print(camera.world_rotation)
+            print("test key")
+
 
         if key == 'e':
             self.reset_cube()
             self.my_step_ui.text = dedent("Đã giải!")
             self.firstCall = True
         if key == 'o':
+            self.reset_cube()
             self.my_step_ui.text = dedent("Đang mở camera,...")
             print("opening camera...")
             self.rubik_detect()
