@@ -37,11 +37,11 @@ https://github.com/user-attachments/assets/9f3bc9a4-80dc-45a8-9c51-48010a75655a
 
 ## Hướng dẫn sử dụng
 
-## Ở màn hình ngoài
+### Ở màn hình ngoài
 - Sẽ có các chức năng cơ bản đã có hướng dẫn
 - Ngoài ra, để thao tác với khối rubik, sử dụng các phím U, L, D, B, R, F tương ứng với các mặt của khối trong tiếng anh
 - Sử dụng phải chuột để thay đổi góc nhìn
-## Khi đang ở trong màn nhận diện
+### Khi đang ở trong màn nhận diện
 - Sử dụng các phím tương tự trên để nhận màu của mặt khối rubik
 - Nếu quét xong, ấn Enter để tiến hành áp vào khối 3D và tiến hành giải. Nếu muốn hủy ấn q.
 
